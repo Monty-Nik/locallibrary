@@ -1,4 +1,5 @@
 from django.shortcuts import render
+
 from .models import Book, Author, BookInstance, Genre
 
 def index(request):
@@ -16,7 +17,6 @@ def index(request):
     # переменной контекста context
     return render(
         request,
-        '/catalog/index.html',
+        'index.html',
         context={'num_books':num_books,'num_instances':num_instances,'num_instances_available':num_instances_available,'num_authors':num_authors},
     )
-# Создайте ваше отображение здесь
