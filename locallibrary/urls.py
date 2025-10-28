@@ -18,9 +18,16 @@ from django.urls import path
 from django.urls import include
 from django.conf import settings
 from django.conf.urls.static import static
+#Add Django site authentication urls (for login, logout, password management)
+# Инициализируем urlpatterns как пустой список
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('catalog/', include('catalog.urls')),
+]
+
+# Затем добавляем аутентификацию
+urlpatterns += [
+    path('accounts/', include('django.contrib.auth.urls')),
 ]
 
 

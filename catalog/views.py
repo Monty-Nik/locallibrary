@@ -1,8 +1,18 @@
 from django.http import Http404
 from django.shortcuts import render
-
 from .models import Book, Author, BookInstance, Genre
 from django.views import generic
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def profile_view(request):
+    return render(request, 'catalog/profile.html')
+
+# Просмотр всех пользователей
+users = User.objects.all()
+for user in users:
+    print(user.username, user.email)
 
 class BookListView(generic.ListView):
     model = Book
