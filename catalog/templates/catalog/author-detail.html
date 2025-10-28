@@ -1,19 +1,22 @@
 {% extends "base_generic.html" %}
 
 {% block content %}
-  <h1>Author: {{ author.first_name }} {{ author.last_name }}</h1>
+  <h1>Author: {{ author.last_name }}, {{ author.first_name }}</h1>
 
-  <p><strong>Date of Birth:</strong> {{ author.date_of_birth }}</p>
-  {% if author.date_of_death %}
-    <p><strong>Date of Death:</strong> {{ author.date_of_death }}</p>
-  {% endif %}
+  <p><strong>Date of birth:</strong> {{ author.date_of_birth|default:"Unknown" }}</p>
+  <p><strong>Date of death:</strong> {{ author.date_of_death|default:"Present" }}</p>
+
+  <!-- Добавьте ссылку назад к списку авторов -->
+  <p><a href="{% url 'authors' %}">Back to author list</a></p>
 
   <div style="margin-left:20px;margin-top:20px">
     <h4>Books</h4>
     {% for book in author.book_set.all %}
       <hr>
-      <p><a href="{{ book.get_absolute_url }}">{{ book.title }}</a></p>
-      <p>{{ book.summary }}</p>
+      <p><strong>Title:</strong> <a href="{% url 'book-detail' book.pk %}">{{ book.title }}</a></p>
+      <p><strong>Summary:</strong> {{ book.summary }}</p>
+    {% empty %}
+      <p>This author has no books in the library.</p>
     {% endfor %}
   </div>
 {% endblock %}
