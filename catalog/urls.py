@@ -28,3 +28,7 @@ urlpatterns += [
     re_path(r'^mybooks/$', views.LoanedBooksByUserListView, name='my-borrowed'),
     re_path(r'^all-borrowed/$', views.AllLoanedBooksListView.as_view(), name='all-borrowed'),
 ]
+
+urlpatterns += [
+    path('book/<uuid:pk>/renew/', views.renew_book_librarian, name='renew-book-librarian'),
+]

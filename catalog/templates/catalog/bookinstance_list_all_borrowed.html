@@ -1,19 +1,30 @@
 {% extends "base_generic.html" %}
 
-{% block title %}All Borrowed Books{% endblock %}
-
 {% block content %}
-  <h1>All Borrowed Books</h1>
+    <h1>Renew: {{ bookinst.book.title }}</h1>
 
-  {% if bookinstance_list %}
-    <ul>
-      {% for bookinst in bookinstance_list %}
-        <li class="{% if bookinst.is_overdue %}text-danger{% endif %}">
-          {{ bookinst.book.title }} ({{ bookinst.due_back|date:"M. d, Y" }}) - {{ bookinst.borrower.username }}
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>There are no books borrowed.</p>
-  {% endif %}
+    <p><strong>Borrower:</strong> {{ bookinst.borrower }}</p>
+    <p><strong>Due date:</strong> {{ bookinst.due_back|date:"M. d, Y" }}</p>
+
+    <form action="" method="post">
+        {% csrf_token %}
+
+        <div class="form-field">
+            <strong>{{ form.renewal_date.label_tag }}</strong>
+            {{ form.renewal_date }}
+            {% if form.renewal_date.help_text %}
+                <div style="margin-top: 5px; font-size: 0.9em; color: #666;">
+                    {{ form.renewal_date.help_text }}
+                </div>
+            {% endif %}
+            {% if form.renewal_date.errors %}
+                <div style="color: red; margin-top: 5px;">
+                    {{ form.renewal_date.errors }}
+                </div>
+            {% endif %}
+        </div>
+
+        <br>
+        <input type="submit" value="Submit" />
+    </form>
 {% endblock %}

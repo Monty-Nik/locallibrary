@@ -1,13 +1,16 @@
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponse
-from django.shortcuts import render
+from django.http import Http404
 from .models import Book, Author, BookInstance, Genre
 from django.views import generic
 from django.contrib.auth.models import User
-
 from django.views.generic import View, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.decorators import permission_required
+from django.shortcuts import get_object_or_404, render
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+import datetime
+from .forms import RenewBookForm  # Импорт из forms.py
 
 
 @permission_required('catalog.can_mark_returned')
@@ -152,3 +155,38 @@ def index(request):
         context={'num_books':num_books,'num_instances':num_instances,'num_instances_available':num_instances_available,'num_authors':num_authors,
             'num_visits':num_visits}, # num_visits appended
     )
+
+
+def renew_book_librarian(request):
+    return None
+
+
+@permission_required('catalog.can_mark_returned')
+def renew_book_librarian(request, pk):
+    book_inst = get_object_or_404(BookInstance, pk=pk)  # Должен найти BookInstance
+
+    if request.method == 'POST':
+        form = RenewBookForm(request.POST)
+        if form.is_valid():
+            book_inst.due_back = form.cleaned_data['renewal_date']
+            book_inst.save()
+            return HttpResponseRedirect(reverse('all-borrowed'))
+    else:
+        proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
+        form = RenewBookForm(initial={'renewal_date': proposed_renewal_date})
+
+    return render(request, 'catalog/book_renew_librarian.html', {
+        'form': form,
+        'bookinst': book_inst  # ← Эта переменная должна передаваться
+    })
+
+class AllLoanedBooksListView(PermissionRequiredMixin, ListView):
+    model = BookInstance
+    template_name = 'catalog/bookinstance_list_all_borrowed.html'
+    paginate_by = 10
+    permission_required = 'catalog.can_mark_returned'
+
+    def get_queryset(self):
+        return BookInstance.objects.filter(
+            status__exact='o'
+        ).order_by('due_back')
