@@ -1,15 +1,69 @@
 from django.contrib.auth.decorators import login_required
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import render
 from .models import Book, Author, BookInstance, Genre
 from django.views import generic
 from django.contrib.auth.models import User
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import View
+
+from django.views.generic import View, ListView
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.decorators import permission_required
+
+
+@permission_required('catalog.can_mark_returned')
+@permission_required('catalog.can_edit')
+# def my_view(request):
+#         """Эта функция требует разрешение catalog.can_mark_returned"""
+#         if request.method == 'GET':
+#             # Логика для GET запроса
+#             return HttpResponse("This is my protected view!")
+#
+#         # Или рендеринг шаблона
+#         return render(request, 'my_template.html')
+
+class LoanedBooksByUserListView(LoginRequiredMixin,generic.ListView):
+    """
+    Generic class-based view listing books on loan to current user.
+    """
+    model = BookInstance
+    template_name ='catalog/bookinstance_list_borrowed_user.html'
+    paginate_by = 10
+
+    def get_queryset(self):
+        return BookInstance.objects.filter(borrower=self.request.user).filter(status__exact='o').order_by('due_back')
+
+
 class MyView(LoginRequiredMixin, View):
+    permission_required = ('catalog.can_mark_returned', 'catalog.can_edit')
+    # Или с явным указанием tuple
+    permission_required = tuple(['catalog.can_mark_returned', 'catalog.can_edit'])
     login_url = '/login/'
     redirect_field_name = 'redirect_to'
 
+
+class AllLoanedBooksListView(PermissionRequiredMixin, ListView):
+    """Представление для отображения всех взятых книг (только для библиотекарей)"""
+    model = BookInstance
+    template_name = 'catalog/bookinstance_list_all_borrowed.html'
+    paginate_by = 10
+    permission_required = 'catalog.can_mark_returned'
+
+    def get_queryset(self):
+        return BookInstance.objects.filter(
+            status__exact='o'  # 'o' означает 'on loan' (взята)
+        ).order_by('due_back')
+
+@login_required
+def LoanedBooksByUserListView(request):
+    """Функция для отображения книг, взятых пользователем"""
+    book_list = BookInstance.objects.filter(
+        borrower=request.user,
+        status__exact='o'
+    ).order_by('due_back')
+
+    return render(request, 'catalog/bookinstance_list_borrowed_user.html', {
+        'bookinstance_list': book_list
+    })
 
 
 @login_required

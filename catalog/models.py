@@ -41,6 +41,10 @@ class Book(models.Model):
 
 class BookInstance(models.Model):
     borrower = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    class Meta:
+
+        ...
+        permissions = (("can_mark_returned", "Set book as returned"),)
 
     @property
     def is_overdue(self):

@@ -23,3 +23,8 @@ urlpatterns += [
     path('author/<int:pk>', views.AuthorDetailView.as_view(), name='author-detail'),
     path('profile/', views.profile_view, name='profile'),  # добавьте этот путь
 ]
+
+urlpatterns += [
+    re_path(r'^mybooks/$', views.LoanedBooksByUserListView, name='my-borrowed'),
+    re_path(r'^all-borrowed/$', views.AllLoanedBooksListView.as_view(), name='all-borrowed'),
+]
