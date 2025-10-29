@@ -30,8 +30,6 @@
                 <li>User: {{ user.get_username }}</li>
                 <li><a href="{% url 'my-borrowed' %}">My Borrowed</a></li>
                 <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>
-
-                <!-- ДОБАВЛЯЕМ БЛОК STAFF С ЧЕРТОЙ -->
                 {% if user.is_staff %}
                   <li style="border-top: 1px solid #ccc; margin-top: 10px; padding-top: 10px;"><strong>Staff</strong></li>
                   <li><a href="{% url 'all-borrowed' %}">All borrowed</a></li>
