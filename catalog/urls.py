@@ -9,6 +9,7 @@ urlpatterns = [
     path('authors/', views.AuthorListView.as_view(), name='authors'),  # имя 'authors' для списка авторов
     path('author/<int:pk>', views.AuthorDetailView.as_view(), name='author-detail'),
     path('author-list/', views.AuthorListView.as_view(), name='author_list'),
+    path('author/create/', views.AuthorCreate.as_view(), name='author-create'),
 ]
 urlpatterns += [
     path('', views.index, name='index'),

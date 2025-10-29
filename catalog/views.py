@@ -3,7 +3,7 @@ from django.http import Http404
 from .models import Book, Author, BookInstance, Genre
 from django.views import generic
 from django.contrib.auth.models import User
-from django.views.generic import View, ListView
+from django.views.generic import View, ListView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.decorators import permission_required
 from django.shortcuts import get_object_or_404, render
@@ -136,6 +136,11 @@ class AuthorDetailView(generic.DetailView):
     model = Author
     template_name = 'catalog/author-detail.html'
 
+class AuthorCreate(PermissionRequiredMixin, CreateView):
+    model = Author
+    fields = '__all__'
+    initial={'date_of_death':'12/10/2016',}
+    permission_required = 'catalog.can_mark_returned'
 
 def index(request):
     # не забывай объявлять переменные
