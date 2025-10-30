@@ -40,10 +40,10 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
 
-# Перенаправление после входа
+# Перенаправление после логина
 LOGIN_REDIRECT_URL = '/'
 
-# Перенаправление после выхода
+# Перенаправление после логаута
 LOGOUT_REDIRECT_URL = '/'
 
 # Application definition
@@ -169,3 +169,5 @@ STATIC_URL = '/static/'
 # Уменьшение статических файлов
 # https://warehouse.python.org/project/whitenoise/
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

@@ -1,36 +1,32 @@
-from django.shortcuts import get_object_or_404, render
-from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django import forms
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 import datetime
-from catalog.models import BookInstance
+
 from django import forms
 
 class RenewBookForm(forms.Form):
-    renewal_date = forms.DateField(help_text="Enter a date between now and 4 weeks (default 3).")
+    renewal_date = forms.DateField(
+        help_text="Enter a date between now and 4 weeks (default 3).",
+        widget=forms.SelectDateWidget()  # Добавляет виджет выбора даты
+    )
 
-def renew_book_librarian(request, pk):
-    book_inst = get_object_or_404(BookInstance, pk=pk)
 
-    # Если данный запрос типа POST, тогда
-    if request.method == 'POST':
+class RenewBookForm(forms.Form):
+    renewal_date = forms.DateField(
+        help_text="Enter a date between now and 4 weeks (default 3)."
+    )
 
-        # Создаём экземпляр формы и заполняем данными из запроса (связывание, binding):
-        form = RenewBookForm(request.POST)
+    def clean_renewal_date(self):
+        data = self.cleaned_data['renewal_date']
 
-        # Проверка валидности данных формы:
-        if form.is_valid():
-            # Обработка данных из form.cleaned_data
-            #(здесь мы просто присваиваем их полю due_back)
-            book_inst.due_back = form.cleaned_data['renewal_date']
-            book_inst.save()
+        # Проверка того, что дата не в прошлом
+        if data < datetime.date.today():
+            raise ValidationError(_('Invalid date - renewal in past'))
 
-            # Переход по адресу 'all-borrowed':
-            return HttpResponseRedirect(reverse('all-borrowed') )
+        # Проверка того, что дата не больше 4 недель вперед
+        if data > datetime.date.today() + datetime.timedelta(weeks=4):
+            raise ValidationError(_('Invalid date - renewal more than 4 weeks ahead'))
 
-    # Если это GET (или какой-либо ещё), создать форму по умолчанию.
-    else:
-        proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
-        form = RenewBookForm(initial={'renewal_date': proposed_renewal_date,})
-
-    return render(request, 'catalog/book_renew_librarian.html', {'form': form, 'bookinst':book_inst})
-
+        # Всегда возвращаем очищенные данные
+        return data

@@ -40,10 +40,9 @@ class Book(models.Model):
         return reverse('book-detail', args=[str(self.id)])
 
 class BookInstance(models.Model):
+    objects = None
     borrower = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
     class Meta:
-
-        ...
         permissions = (("can_mark_returned", "Set book as returned"),)
 
     @property

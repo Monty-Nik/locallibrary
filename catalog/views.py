@@ -1,5 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
+from django.urls.base import reverse_lazy
+from django.views.generic.edit import UpdateView, DeleteView
+
 from .models import Book, Author, BookInstance, Genre
 from django.views import generic
 from django.contrib.auth.models import User
@@ -13,16 +16,9 @@ import datetime
 from .forms import RenewBookForm  # Импорт из forms.py
 
 
-@permission_required('catalog.can_mark_returned')
+
 @permission_required('catalog.can_edit')
-# def my_view(request):
-#         """Эта функция требует разрешение catalog.can_mark_returned"""
-#         if request.method == 'GET':
-#             # Логика для GET запроса
-#             return HttpResponse("This is my protected view!")
-#
-#         # Или рендеринг шаблона
-#         return render(request, 'my_template.html')
+
 
 class LoanedBooksByUserListView(LoginRequiredMixin,generic.ListView):
     """
@@ -44,6 +40,7 @@ class MyView(LoginRequiredMixin, View):
     redirect_field_name = 'redirect_to'
 
 
+
 class AllLoanedBooksListView(PermissionRequiredMixin, ListView):
     """Представление для отображения всех взятых книг (только для библиотекарей)"""
     model = BookInstance
@@ -56,19 +53,24 @@ class AllLoanedBooksListView(PermissionRequiredMixin, ListView):
             status__exact='o'  # 'o' означает 'on loan' (взята)
         ).order_by('due_back')
 
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import BookInstance
+
+
+
 @login_required
 def LoanedBooksByUserListView(request):
-    """Функция для отображения книг, взятых пользователем"""
-    book_list = BookInstance.objects.filter(
-        borrower=request.user,
-        status__exact='o'
+    bookinstance_list = BookInstance.objects.filter(
+        borrower=request.user
+    ).filter(
+        status__exact='o'  # 'o' означает "on loan"
     ).order_by('due_back')
 
     return render(request, 'catalog/bookinstance_list_borrowed_user.html', {
-        'bookinstance_list': book_list
+        'bookinstance_list': bookinstance_list
     })
-
-
 @login_required
 def profile_view(request):
     return render(request, 'catalog/profile.html')
@@ -162,36 +164,45 @@ def index(request):
     )
 
 
-def renew_book_librarian(request):
-    return None
 
 
 @permission_required('catalog.can_mark_returned')
 def renew_book_librarian(request, pk):
-    book_inst = get_object_or_404(BookInstance, pk=pk)  # Должен найти BookInstance
+    """
+    View function for renewing a specific BookInstance by librarian
+    """
+    book_inst = get_object_or_404(BookInstance, pk=pk)
 
+    # Если это POST запрос - обрабатываем данные формы
     if request.method == 'POST':
+        # Создаем экземпляр формы и заполняем данными из запроса
         form = RenewBookForm(request.POST)
+
+        # Проверяем валидность формы
         if form.is_valid():
+            # Обрабатываем данные из form.cleaned_data
             book_inst.due_back = form.cleaned_data['renewal_date']
             book_inst.save()
+
+            # Перенаправляем на страницу всех взятых книг
             return HttpResponseRedirect(reverse('all-borrowed'))
+
+    # Если это GET (или другой метод) - создаем форму по умолчанию
     else:
         proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
         form = RenewBookForm(initial={'renewal_date': proposed_renewal_date})
 
-    return render(request, 'catalog/book_renew_librarian.html', {
-        'form': form,
-        'bookinst': book_inst  # ← Эта переменная должна передаваться
-    })
+    return render(request, 'catalog/book_renew_librarian.html', {'form': form, 'bookinst': book_inst})
 
-class AllLoanedBooksListView(PermissionRequiredMixin, ListView):
-    model = BookInstance
-    template_name = 'catalog/bookinstance_list_all_borrowed.html'
-    paginate_by = 10
-    permission_required = 'catalog.can_mark_returned'
+class AuthorCreate(CreateView):
+    model = Author
+    fields = '__all__'
+    initial={'date_of_death':'12/10/2016',}
 
-    def get_queryset(self):
-        return BookInstance.objects.filter(
-            status__exact='o'
-        ).order_by('due_back')
+class AuthorUpdate(UpdateView):
+    model = Author
+    fields = ['first_name','last_name','date_of_birth','date_of_death']
+
+class AuthorDelete(DeleteView):
+    model = Author
+    success_url = reverse_lazy('authors')

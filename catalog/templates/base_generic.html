@@ -2,46 +2,71 @@
 <html lang="en">
 <head>
     {% block title %}<title>Local Library</title>{% endblock %}
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    
+    <style>
+        .link-button {
+            background: none;
+            border: none;
+            color: #337AB7;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 0;
+            font: inherit;
+        }
+
+        .link-button:hover {
+            color: #337AB7;
+            text-decoration: underline;
+        }
+    </style>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"/>
 </head>
 
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-sm-2">
-                {% block sidebar %}
-                    <ul class="sidebar-nav">
-                        <li><a href="{% url 'index' %}">Home</a></li>
-                        <li><a href="{% url 'books' %}">All books</a></li>
-                        <li><a href="{% url 'authors' %}">All authors</a></li>
-                        
-                        {% if user.is_authenticated %}
-                            <li>User: {{ user.get_username }}</li>
-                            <li><a href="{% url 'my-borrowed' %}">My Borrowed</a></li>
-                            
-                            {% if user.is_staff %}
-                                <li style="border-top: 1px solid #ccc; margin-top: 10px; padding-top: 10px;"><strong>Staff</strong></li>
-                                <li><a href="{% url 'all-borrowed' %}">All borrowed</a></li>
-                            {% endif %}
-                            
-                            <li><a href="{% url 'logout' %}?next={{ request.path }}">Logout</a></li>
-                        {% else %}
-                            <li><a href="{% url 'login' %}?next={{ request.path }}">Login</a></li>
-                        {% endif %}
-                    </ul>
-                {% endblock %}
-            </div>
-            <div class="col-sm-10">
-                {% block content %}{% endblock %}
-            </div>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-2">
+            {% block sidebar %}
+                <ul class="sidebar-nav">
+                    <li><a href="{% url 'index' %}">Home</a></li>
+                    <li><a href="{% url 'books' %}">All books</a></li>
+                    <li><a href="{% url 'authors' %}">All authors</a></li>
+                    <li><a href="{% url 'author-create' %}">Create authors</a></li>
+
+
+                    {% if user.is_authenticated %}
+                    {% endif %}
+                    {% if user.is_staff %}
+                        <li style="border-top: 1px solid #ccc; margin-top: 10px; padding-top: 10px;">
+                            <strong>Staff</strong></li>
+                        <li><a href="{% url 'all-borrowed' %}">All borrowed</a></li>
+                    {% endif %}
+
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'my-borrowed' %}">My Borrowed</a></li>
+                        <li>User: {{ user.get_username }}</li>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="link-button">logout</button>
+                        </form>
+                        {#                        <li><a  href="{% url 'logout' %}">Logout GET ({{ user.get_username }})</li>#}
+                    {% else %}
+                        <li><a href="{% url 'login' %}?next={{ request.path }}">Login</a></li>
+                    {% endif %}
+
+                </ul>
+            {% endblock %}
+
+        </div>
+        <div class="col-sm-10">
+            {% block content %}{% endblock %}
         </div>
     </div>
+</div>
 </body>
 </html>
