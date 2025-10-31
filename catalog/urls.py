@@ -26,8 +26,8 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-    re_path(r'^mybooks/$', views.LoanedBooksByUserListView, name='my-borrowed'),
-    re_path(r'^all-borrowed/$', views.AllLoanedBooksListView.as_view(), name='all-borrowed'),
+    re_path(r'^mybooks/$', views.LoanedBooksByUserListView.as_view(), name='my-borrowed'),
+    path('all-borrowed/', views.AllBorrowedBooksListView.as_view(), name='all-borrowed'),
 ]
 
 urlpatterns += [

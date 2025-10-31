@@ -2,7 +2,6 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.urls.base import reverse_lazy
 from django.views.generic.edit import UpdateView, DeleteView
-
 from .models import Book, Author, BookInstance, Genre
 from django.views import generic
 from django.contrib.auth.models import User
@@ -40,19 +39,15 @@ class MyView(LoginRequiredMixin, View):
     redirect_field_name = 'redirect_to'
 
 
-
-class AllLoanedBooksListView(PermissionRequiredMixin, ListView):
-    """Представление для отображения всех взятых книг (только для библиотекарей)"""
-    model = BookInstance
-    template_name = 'catalog/bookinstance_list_all_borrowed.html'
-    paginate_by = 10
+class AllBorrowedBooksListView(PermissionRequiredMixin, generic.ListView):
+    """View for all borrowed books, librarian only"""
     permission_required = 'catalog.can_mark_returned'
+    template_name = 'catalog/bookinstance_list_all_borrowed.html'
+    context_object_name = 'bookinstance_list'
 
     def get_queryset(self):
-        return BookInstance.objects.filter(
-            status__exact='o'  # 'o' означает 'on loan' (взята)
-        ).order_by('due_back')
-
+        # Получаем ВСЕ взятые книги, включая информацию о заемщике
+        return BookInstance.objects.filter(status__exact='o').select_related('book', 'borrower').order_by('due_back')
 
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
@@ -60,17 +55,16 @@ from .models import BookInstance
 
 
 
-@login_required
-def LoanedBooksByUserListView(request):
-    bookinstance_list = BookInstance.objects.filter(
-        borrower=request.user
-    ).filter(
-        status__exact='o'  # 'o' означает "on loan"
-    ).order_by('due_back')
+class LoanedBooksByUserListView(LoginRequiredMixin,generic.ListView):
+    """
+    Generic class-based view listing books on loan to current user.
+    """
+    model = BookInstance
+    template_name ='catalog/bookinstance_list_borrowed_user.html'
+    paginate_by = 10
 
-    return render(request, 'catalog/bookinstance_list_borrowed_user.html', {
-        'bookinstance_list': bookinstance_list
-    })
+    def get_queryset(self):
+        return BookInstance.objects.filter(borrower=self.request.user).filter(status__exact='o').order_by('due_back')
 @login_required
 def profile_view(request):
     return render(request, 'catalog/profile.html')
@@ -79,6 +73,9 @@ def profile_view(request):
 users = User.objects.all()
 for user in users:
     print(user.username, user.email)
+
+
+
 
 class BookListView(generic.ListView):
     model = Book
