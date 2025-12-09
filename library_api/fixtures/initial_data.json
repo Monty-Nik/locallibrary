@@ -1,0 +1,29 @@
+[
+  {
+    "model": "library_api.AuthorAPI",
+    "pk": 1,
+    "fields": {
+      "name": "Лев Толстой",
+      "biography": "Русский писатель, один из величайших писателей мира.",
+      "nationality": "Русский",
+      "birth_date": "1828-09-09",
+      "death_date": "1910-11-20"
+    }
+  },
+  {
+    "model": "library_api.BookAPI",
+    "pk": 1,
+    "fields": {
+      "title": "Война и мир",
+      "author": 1,
+      "publication_year": 1869,
+      "genre": "Роман",
+      "category": "fiction",
+      "publisher": "Русский вестник",
+      "is_textbook": false,
+      "edition": 1,
+      "description": "Роман-эпопея, описывающий русское общество в эпоху войн против Наполеона.",
+      "isbn": "978-5-17-090456-1"
+    }
+  }
+]
