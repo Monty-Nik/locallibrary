@@ -43,6 +43,7 @@
                     {% if user.is_staff %}
                         <li style="border-top: 1px solid #ccc; margin-top: 10px; padding-top: 10px;">
                             <strong>Staff</strong></li>
+                        <li><a href="{% url 'book-create' %}">Create book</a></li>
                         <li><a href="{% url 'all-borrowed' %}">All borrowed</a></li>
                     {% endif %}
 

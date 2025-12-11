@@ -12,8 +12,15 @@ from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 import datetime
-from .forms import RenewBookForm  # Импорт из forms.py
+from django.views.generic.edit import CreateView
+from catalog.models import Book
+from .forms import RenewBookForm
 
+class BookCreate(CreateView):
+    model = Book
+    fields = ['title', 'author', 'genre', 'summary', 'isbn', 'language']
+    # URL, куда перенаправить пользователя после успешного добавления
+    success_url = '/catalog/books/'
 
 
 @permission_required('catalog.can_edit')
