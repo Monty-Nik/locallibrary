@@ -81,5 +81,4 @@ class BookAPITestCase(APITestCase):
             'publisher': 'Тестовое Издательство',
         }
         response = self.client.post(url, data, format='json')
-        # Должна быть ошибка, потому что такая книга уже есть
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

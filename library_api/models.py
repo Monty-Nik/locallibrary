@@ -5,9 +5,6 @@ import os
 
 
 class AuthorAPI(models.Model):
-    """
-    Модель автора для API (расширенная версия)
-    """
     name = models.CharField(max_length=150, unique=True)
     biography = models.TextField(blank=True, null=True)
     birth_date = models.DateField(null=True, blank=True)
@@ -30,9 +27,6 @@ class AuthorAPI(models.Model):
 
 
 class BookAPI(models.Model):
-    """
-    Модель книги для API с уникальными ограничениями
-    """
     CATEGORY_CHOICES = [
         ('fiction', 'Художественная литература'),
         ('textbook', 'Учебник'),
@@ -78,9 +72,6 @@ class BookAPI(models.Model):
         return f"{self.title} ({self.author.name})"
 
     def clean(self):
-        """
-        Валидация при сохранении
-        """
         from django.core.exceptions import ValidationError
 
         # Проверка года публикации

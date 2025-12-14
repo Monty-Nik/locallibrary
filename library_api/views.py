@@ -16,7 +16,6 @@ from .permissions import IsAdminOrReadOnly
 
 
 class AuthorAPIViewSet(viewsets.ModelViewSet):
-    """ViewSet для авторов"""
     queryset = AuthorAPI.objects.all().order_by('name')
     serializer_class = AuthorAPISerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -25,7 +24,6 @@ class AuthorAPIViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'])
     def books(self, request, pk=None):
-        """Получить книги автора"""
         author = self.get_object()
         books = author.books.all()
         serializer = BookAPISerializer(books, many=True)
@@ -33,7 +31,6 @@ class AuthorAPIViewSet(viewsets.ModelViewSet):
 
 
 class BookAPIViewSet(viewsets.ModelViewSet):
-    """ViewSet для книг"""
     queryset = BookAPI.objects.all().order_by('-created_at')
     serializer_class = BookAPISerializer
     permission_classes = [IsAdminOrReadOnly]
@@ -43,12 +40,10 @@ class BookAPIViewSet(viewsets.ModelViewSet):
     search_fields = ['title', 'author__name', 'genre', 'publisher']
 
     def perform_create(self, serializer):
-        """Автоматически устанавливаем создателя"""
         serializer.save(created_by=self.request.user)
 
     @action(detail=False, methods=['get'])
     def search(self, request):
-        """Поиск книг"""
         serializer = BookSearchSerializer(data=request.query_params)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -79,14 +74,12 @@ class BookAPIViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def textbooks(self, request):
-        """Получить только учебники"""
         textbooks = BookAPI.objects.filter(is_textbook=True)
         serializer = self.get_serializer(textbooks, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=['get'])
     def recent(self, request):
-        """Недавно добавленные книги"""
         recent_books = BookAPI.objects.all().order_by('-created_at')[:10]
         serializer = self.get_serializer(recent_books, many=True)
         return Response(serializer.data)
@@ -95,7 +88,6 @@ class BookAPIViewSet(viewsets.ModelViewSet):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def api_root(request):
-    """Корневой endpoint API"""
     return Response({
         'authors': request.build_absolute_uri('/api/v1/authors/'),
         'books': request.build_absolute_uri('/api/v1/books/'),
@@ -106,7 +98,6 @@ def api_root(request):
 
 
 class StatisticsView(generics.GenericAPIView):
-    """Статистика библиотеки"""
     permission_classes = [AllowAny]
 
     def get(self, request):
