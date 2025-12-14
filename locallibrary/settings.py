@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'crispy_forms',
+    'crispy_bootstrap5',
     'widget_tweaks',
 ]
 
@@ -166,3 +167,16 @@ LOGOUT_REDIRECT_URL = '/'
 
 # Email backend (for development)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        # Убедитесь, что эта строка присутствует:
+        'rest_framework.authentication.BasicAuthentication',
+
+        # Обычно эта строка тоже нужна для работы в браузере:
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+}

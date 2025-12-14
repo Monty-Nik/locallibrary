@@ -6,7 +6,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
-
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from .models import AuthorAPI, BookAPI
 from .serializers import (
     AuthorAPISerializer, BookAPISerializer,
@@ -37,7 +37,7 @@ class BookAPIViewSet(viewsets.ModelViewSet):
     queryset = BookAPI.objects.all().order_by('-created_at')
     serializer_class = BookAPISerializer
     permission_classes = [IsAdminOrReadOnly]
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['category', 'is_textbook', 'genre']
     search_fields = ['title', 'author__name', 'genre', 'publisher']

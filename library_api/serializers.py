@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import AuthorAPI, BookAPI
 from django.core.validators import FileExtensionValidator
-
+from django.contrib.auth.models import AnonymousUser
 
 class AuthorAPISerializer(serializers.ModelSerializer):
     """Сериализатор для авторов"""
@@ -60,6 +60,10 @@ class BookAPISerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         """Переопределение создания для установки создателя"""
         validated_data['created_by'] = self.context['request'].user
+        return super().create(validated_data)
+        if not isinstance(user, AnonymousUser) and user.is_authenticated:
+            validated_data['created_by'] = user
+
         return super().create(validated_data)
 
 
